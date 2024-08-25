@@ -21,3 +21,4 @@ $ ./minesweeper
 
 ## TODO
 - [ ] Board size as CLI arg
+- [ ] Fair start (only randomize after first reveal)
