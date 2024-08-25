@@ -80,7 +80,7 @@ void fieldRandomizeBombs(Field *field, int bombPercentage) {
 }
 
 bool isInField(Field *field, int row, int col) {
-  return (row < 0) || (row >= field->rows) || (col < 0) || (col >= field->cols);
+  return (row >= 0) || (row < field->rows) || (col >= 0) || (col < field->cols);
 }
 
 int fieldCellGetNborBombsCount(Field *field, int row, int col) {
