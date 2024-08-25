@@ -8,6 +8,8 @@
 #define ROWS 10
 #define COLS 10
 #define BOMB_PERCENTAGE 25
+#define ANSI_RED "\x1b[31m"
+#define ANSI_RESET "\x1b[0m"
 
 typedef enum { OPEN, CLOSED, FLAGGED } State;
 typedef enum { EMPTY, BOMB } CellType;
@@ -114,7 +116,7 @@ void fieldPrint(Field *field) {
         printf(".");
         break;
       case FLAGGED:
-        printf("!");
+        printf(ANSI_RED"!"ANSI_RESET);
         break;
       }
 
