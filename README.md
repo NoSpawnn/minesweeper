@@ -31,4 +31,4 @@ $ cp minesweeper ~/.local/bin
 ## TODO
 - [x] Board size as CLI arg
 - [x] Fair start (only randomize after first reveal)
-- [ ] Open all adjacent empty cells when appropriate
+- [x] Open all adjacent empty cells when appropriate
