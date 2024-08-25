@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
   else if (colFlagVal && !rowFlagVal)
     fieldInit(&field, DEFAULT_ROWS, atoi(colFlagVal));
   else if (!colFlagVal && rowFlagVal)
-    fieldInit(&field, atoi(rowFlagVal), atoi(colFlagVal));
+    fieldInit(&field, atoi(rowFlagVal), DEFAULT_COLS);
   else if (colFlagVal && rowFlagVal)
     fieldInit(&field, atoi(rowFlagVal), atoi(colFlagVal));
 
