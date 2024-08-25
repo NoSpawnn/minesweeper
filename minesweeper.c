@@ -1,34 +1,9 @@
-#include <stdbool.h>
+#include "minesweeper.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
-
-#define DEFAULT_ROWS 10
-#define DEFAULT_COLS 10
-#define BOMB_PERCENTAGE 25
-#define ANSI_RED "\x1b[31m"
-#define ANSI_RESET "\x1b[0m"
-
-typedef enum { OPEN, CLOSED, FLAGGED } State;
-typedef enum { EMPTY, BOMB } CellType;
-typedef enum { UP, DOWN, LEFT, RIGHT } Direction;
-
-typedef struct {
-  State state;
-  CellType type;
-} Cell;
-
-typedef struct {
-  int rows;
-  int cols;
-  int cursorRow;
-  int cursorCol;
-  Cell **cells;
-} Field;
-
-void fieldOpenAdjacentCells(Field *field, int row, int col);
 
 struct termios savedAttrs;
 int totalFlagged = 0, correctlyFlagged = 0;
