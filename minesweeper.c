@@ -80,8 +80,7 @@ void fieldRandomizeBombs(Field *field, int bombPercentage) {
 }
 
 bool isInField(Field *field, int row, int col) {
-  return (row < 0) || (row >= field->rows) || 
-          (col < 0) || (col >= field->cols);
+  return (row < 0) || (row >= field->rows) || (col < 0) || (col >= field->cols);
 }
 
 int fieldCellGetNborBombsCount(Field *field, int row, int col) {
@@ -299,9 +298,7 @@ int main(int argc, char *argv[]) {
       }
       fieldOpenCellAtCursor(&field);
       break;
-    // TODO: Catch ctrl+c
     case 'q':
-    case '\x003':
       fieldFree(&field);
       exit(0);
     }
@@ -314,5 +311,6 @@ int main(int argc, char *argv[]) {
     fieldRePrint(&field);
   }
 
+  fieldFree(&field);
   return 0;
 }
