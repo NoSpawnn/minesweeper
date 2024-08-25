@@ -1,5 +1,6 @@
 # Minesweeper TUI written in C
 - A terminal based minesweeper clone in C
+- Untested on Windows, do let me know if you try it, but I don't *think* it will work
 
 ## Usage
 1. Clone the repo
