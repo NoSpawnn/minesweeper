@@ -252,6 +252,7 @@ int main() {
       fieldOpenCellAtCursor(&field);
       break;
     case 'q':
+    // TODO: Catch ctrl+c
     case '\x003':
       exit(0);
     }
