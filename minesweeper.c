@@ -50,8 +50,7 @@ void fieldInit(Field *field, int rows, int cols) {
 
 void fieldRandomizeBombs(Field *field, int bombPercentage) {
   int totalCells = field->cols * field->rows;
-  int bombCount = totalCells * bombPercentage / 100;
-  totalBombs = bombCount;
+  totalBombs = totalCells * bombPercentage / 100;
   int setBombs = 0;
 
   do {
@@ -63,7 +62,7 @@ void fieldRandomizeBombs(Field *field, int bombPercentage) {
       setBombs++;
     }
 
-  } while (setBombs != bombCount);
+  } while (setBombs != totalBombs);
 }
 
 int fieldCellGetNborBombsCount(Field *field, int row, int col) {
