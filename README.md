@@ -1,6 +1,7 @@
 # Minesweeper TUI written in C
 - A terminal based minesweeper clone in C
 - Untested on Windows, do let me know if you try it, but I don't *think* it will work
+- **NOTE**: If you exit via Ctrl+C, your cursor will be invisible. Re-run the game and quit with `q` instead.
 
 ## Usage
 1. Clone the repo
