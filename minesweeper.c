@@ -8,30 +8,38 @@
 #define COLS 10
 #define BOMB_PERCENTAGE 25
 
-enum State { OPEN, CLOSED, FLAGGED };
-enum CellType { EMPTY, BOMB };
+typedef enum { OPEN, CLOSED, FLAGGED } State;
+typedef enum { EMPTY, BOMB } CellType;
+typedef enum { UP, DOWN, LEFT, RIGHT } Direction;
 
 typedef struct {
-  enum State state;
-  enum CellType type;
+  State state;
+  CellType type;
 } Cell;
 
 typedef struct {
   int rows;
-  int columns;
+  int cols;
   int cursorRow;
   int cursorCol;
   Cell cells[ROWS][COLS];
 } Field;
 
+struct termios savedAttrs;
+
+void resetTermState() {
+  tcsetattr(STDIN_FILENO, TCSANOW, &savedAttrs);
+  printf("\033[?25h");
+}
+
 void fieldInit(Field *field, int rows, int cols) {
   field->rows = rows;
-  field->columns = cols;
+  field->cols = cols;
   field->cursorRow = 0;
   field->cursorCol = 0;
 
   for (int row = 0; row < field->rows; row++) {
-    for (int col = 0; col < field->columns; col++) {
+    for (int col = 0; col < field->cols; col++) {
       field->cells[row][col].state = CLOSED;
       field->cells[row][col].type = EMPTY;
     }
@@ -39,13 +47,13 @@ void fieldInit(Field *field, int rows, int cols) {
 }
 
 void fieldRandomizeBombs(Field *field, int bombPercentage) {
-  int totalCells = field->columns * field->rows;
+  int totalCells = field->cols * field->rows;
   int bombCount = totalCells * bombPercentage / 100;
   int setBombs = 0;
 
   do {
     int randRow = rand() % (field->rows);
-    int randCol = rand() % (field->columns);
+    int randCol = rand() % (field->cols);
 
     if (field->cells[randRow][randCol].type != BOMB) {
       field->cells[randRow][randCol].type = BOMB;
@@ -63,7 +71,7 @@ int fieldCellGetNborBombsCount(Field *field, int row, int col) {
       if (row == 0 && rowDelta == -1 ||
           row == field->rows - 1 && rowDelta == 1 ||
           col == 0 && colDelta == -1 ||
-          col == field->columns - 1 && colDelta == 1 ||
+          col == field->cols - 1 && colDelta == 1 ||
           rowDelta == 0 && colDelta == 0)
         continue;
 
@@ -77,7 +85,7 @@ int fieldCellGetNborBombsCount(Field *field, int row, int col) {
 
 void fieldPrint(Field *field) {
   for (int row = 0; row < field->rows; row++) {
-    for (int col = 0; col < field->columns; col++) {
+    for (int col = 0; col < field->cols; col++) {
       if (field->cursorRow == row && field->cursorCol == col)
         printf("[");
       else
@@ -112,19 +120,65 @@ void fieldPrint(Field *field) {
   }
 }
 
+void fieldRePrint(Field *field) {
+  printf("\e[%dA", field->rows + 1);
+  printf("\e[%dD", field->cols);
+  fieldPrint(field);
+}
+
+void fieldShowAllBombs(Field *field) {
+  for (int row = 0; row < field->rows; row++) {
+    for (int col = 0; col < field->cols; col++) {
+      if (field->cells[row][col].type == BOMB)
+        field->cells[row][col].state = OPEN;
+    }
+  }
+  fieldRePrint(field);
+}
+
 void fieldOpenCellAtCursor(Field *field) {
   int row = field->cursorRow;
   int col = field->cursorCol;
+  Cell cell = field->cells[row][col];
 
-  if (field->cells[row][col].state != OPEN)
+  if (cell.type == BOMB) {
+    fieldShowAllBombs(field);
+    printf("\nThat was a bomb! Game over.\n");
+    exit(0);
+  } else if (cell.state != OPEN) {
     field->cells[row][col].state = OPEN;
+  }
+}
+
+void fieldFlagCellAtCursor(Field *field) {
+  field->cells[field->cursorRow][field->cursorCol].state = FLAGGED;
+}
+
+void fieldMoveCursor(Field *field, Direction direction) {
+  switch (direction) {
+  case UP:
+    if (field->cursorRow != 0)
+      field->cursorRow -= 1;
+    break;
+  case DOWN:
+    if (field->cursorRow != field->rows - 1)
+      field->cursorRow += 1;
+    break;
+  case LEFT:
+    if (field->cursorCol != 0)
+      field->cursorCol -= 1;
+    break;
+  case RIGHT:
+    if (field->cursorCol != field->cols - 1)
+      field->cursorCol += 1;
+    break;
+  }
 }
 
 int main() {
   srand(time(NULL));
   char cmd;
   Field field;
-  struct termios savedAttrs;
   struct termios tAttr;
 
   if (!isatty(STDIN_FILENO)) {
@@ -136,10 +190,13 @@ int main() {
   tcgetattr(STDIN_FILENO, &tAttr);
 
   // Non-canonical and disable echo
+  // https://www.gnu.org/software/libc/manual/html_node/Noncanon-Example.html
   tAttr.c_lflag &= ~(ICANON | ECHO);
   tAttr.c_cc[VMIN] = 1;
   tAttr.c_cc[VTIME] = 0;
   tcsetattr(STDIN_FILENO, TCSANOW, &tAttr);
+  printf("\e[?25l"); // Hide cursor
+  atexit(resetTermState);
 
   fieldInit(&field, ROWS, COLS);
   fieldRandomizeBombs(&field, BOMB_PERCENTAGE);
@@ -150,38 +207,35 @@ int main() {
 
     switch (cmd) {
     case 'w':
-      if (field.cursorRow != 0)
-        field.cursorRow -= 1;
+      fieldMoveCursor(&field, UP);
       break;
     case 's':
-      if (field.cursorRow != field.rows - 1)
-        field.cursorRow += 1;
+      fieldMoveCursor(&field, DOWN);
       break;
     case 'a':
-      if (field.cursorCol != 0)
-        field.cursorCol -= 1;
+      fieldMoveCursor(&field, LEFT);
       break;
     case 'd':
-      if (field.cursorCol != field.columns - 1)
-        field.cursorCol += 1;
+      fieldMoveCursor(&field, RIGHT);
       break;
     case 'f':
-      field.cells[field.cursorRow][field.cursorCol].state = FLAGGED;
+      fieldFlagCellAtCursor(&field);
       break;
     case ' ':
       fieldOpenCellAtCursor(&field);
       break;
+    case 'q':
+    case '\x003':
+      exit(0);
     }
 
     // Reset cursor to original position
-    // https://gist.github.com/ConnerWill/d4b6c776b509add763e17f9f113fd25b#cursor-controls
-    printf("\e[%dA", field.rows);
-    printf("\e[%dD", field.columns);
+    // https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#cursor-controls
+    printf("\033[%dA", field.rows);
+    printf("\033[%dD", field.cols);
 
     fieldPrint(&field);
   }
-
-  tcsetattr(STDIN_FILENO, TCSANOW, &savedAttrs);
 
   return 0;
 }
