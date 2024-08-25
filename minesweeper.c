@@ -95,14 +95,14 @@ void fieldPrint(Field *field) {
           else
             printf("%d", bombCount);
         } else {
-          printf("*");
+          printf(BOMB_COLOR "*" ANSI_RESET);
         }
         break;
       case CLOSED:
         printf(".");
         break;
       case FLAGGED:
-        printf(ANSI_RED "!" ANSI_RESET);
+        printf(FLAG_COLOR "!" ANSI_RESET);
         break;
       }
 

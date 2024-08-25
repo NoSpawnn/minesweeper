@@ -3,7 +3,8 @@
 #define DEFAULT_ROWS 10
 #define DEFAULT_COLS 10
 #define BOMB_PERCENTAGE 18
-#define ANSI_RED "\x1b[31m"
+#define BOMB_COLOR "\x1b[31m"
+#define FLAG_COLOR "\x1b[32m"
 #define ANSI_RESET "\x1b[0m"
 
 typedef enum { OPEN, CLOSED, FLAGGED } State;
