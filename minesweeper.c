@@ -26,6 +26,8 @@ typedef struct {
 } Field;
 
 struct termios savedAttrs;
+int correctlyFlagged = 0;
+int totalBombs;
 
 void resetTermState() {
   tcsetattr(STDIN_FILENO, TCSANOW, &savedAttrs);
@@ -49,6 +51,7 @@ void fieldInit(Field *field, int rows, int cols) {
 void fieldRandomizeBombs(Field *field, int bombPercentage) {
   int totalCells = field->cols * field->rows;
   int bombCount = totalCells * bombPercentage / 100;
+  totalBombs = bombCount;
   int setBombs = 0;
 
   do {
@@ -91,9 +94,10 @@ void fieldPrint(Field *field) {
       else
         printf(" ");
 
-      switch (field->cells[row][col].state) {
+      Cell cell = field->cells[row][col];
+      switch (cell.state) {
       case OPEN:
-        if (field->cells[row][col].type == EMPTY) {
+        if (cell.type == EMPTY) {
           int bombCount = fieldCellGetNborBombsCount(field, row, col);
           if (bombCount == 0)
             printf(" ");
@@ -151,7 +155,24 @@ void fieldOpenCellAtCursor(Field *field) {
 }
 
 void fieldFlagCellAtCursor(Field *field) {
-  field->cells[field->cursorRow][field->cursorCol].state = FLAGGED;
+  Cell *cell = &field->cells[field->cursorRow][field->cursorCol];
+
+  if (cell->state == OPEN)
+    return;
+
+  if (cell->state == FLAGGED) {
+    cell->state = CLOSED;
+
+    if (cell->type == BOMB)
+      correctlyFlagged--;
+
+    return;
+  }
+
+  cell->state = FLAGGED;
+
+  if (cell->type == BOMB)
+    correctlyFlagged++;
 }
 
 void fieldMoveCursor(Field *field, Direction direction) {
@@ -226,6 +247,11 @@ int main() {
       break;
     case 'q':
     case '\x003':
+      exit(0);
+    }
+
+    if (correctlyFlagged == totalBombs) {
+      printf("You won!\n");
       exit(0);
     }
 
