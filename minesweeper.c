@@ -79,17 +79,17 @@ void fieldRandomizeBombs(Field *field, int bombPercentage) {
   } while (setBombs != totalBombs);
 }
 
+bool isInField(Field *field, int row, int col) {
+  return (row < 0) || (row >= field->rows) || 
+          (col < 0) || (col >= field->cols);
+}
+
 int fieldCellGetNborBombsCount(Field *field, int row, int col) {
   int mineCount = 0;
 
   for (int rowDelta = -1; rowDelta <= 1; rowDelta++) {
     for (int colDelta = -1; colDelta <= 1; colDelta++) {
-      // TODO: this could probably be a function
-      if ((row == 0 && rowDelta == -1) ||
-          (row == field->rows - 1 && rowDelta == 1) ||
-          (col == 0 && colDelta == -1) ||
-          (col == field->cols - 1 && colDelta == 1) ||
-          (rowDelta == 0 && colDelta == 0))
+      if (!isInField(field, row + rowDelta, col + colDelta))
         continue;
 
       if (field->cells[row + rowDelta][col + colDelta].type == BOMB)
