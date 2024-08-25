@@ -26,7 +26,7 @@ typedef struct {
 } Field;
 
 struct termios savedAttrs;
-int correctlyFlagged = 0;
+int totalFlagged = 0, correctlyFlagged = 0;
 int totalBombs;
 
 void resetTermState() {
@@ -87,6 +87,7 @@ int fieldCellGetNborBombsCount(Field *field, int row, int col) {
 }
 
 void fieldPrint(Field *field) {
+  printf("Marked: %d  Total: %d\n", totalFlagged, totalBombs);
   for (int row = 0; row < field->rows; row++) {
     for (int col = 0; col < field->cols; col++) {
       if (field->cursorRow == row && field->cursorCol == col)
@@ -125,8 +126,11 @@ void fieldPrint(Field *field) {
 }
 
 void fieldRePrint(Field *field) {
+  // Reset cursor to original position
+  // https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#cursor-controls
   printf("\033[%dA", field->rows + 1);
   printf("\033[%dD", field->cols);
+
   fieldPrint(field);
 }
 
@@ -162,6 +166,7 @@ void fieldFlagCellAtCursor(Field *field) {
 
   if (cell->state == FLAGGED) {
     cell->state = CLOSED;
+    totalFlagged--;
 
     if (cell->type == BOMB)
       correctlyFlagged--;
@@ -170,6 +175,7 @@ void fieldFlagCellAtCursor(Field *field) {
   }
 
   cell->state = FLAGGED;
+  totalFlagged++;
 
   if (cell->type == BOMB)
     correctlyFlagged++;
@@ -255,12 +261,7 @@ int main() {
       exit(0);
     }
 
-    // Reset cursor to original position
-    // https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#cursor-controls
-    printf("\033[%dA", field.rows);
-    printf("\033[%dD", field.cols);
-
-    fieldPrint(&field);
+    fieldRePrint(&field);
   }
 
   return 0;
