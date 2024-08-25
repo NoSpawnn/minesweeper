@@ -272,7 +272,7 @@ int main(int argc, char *argv[]) {
 
   fieldPrint(&field);
 
-  while (1) {
+  while (true) {
     read(STDIN_FILENO, &cmd, 1);
 
     switch (cmd) {
