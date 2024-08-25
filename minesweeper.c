@@ -163,6 +163,7 @@ void fieldOpenAdjacentCells(Field *field, int row, int col) {
 
       Cell *cell = &field->cells[currentRow][currentCol];
       if (cell->type == EMPTY && cell->state == CLOSED &&
+          cell->state != FLAGGED &&
           fieldCellGetNborBombsCount(field, currentRow, currentCol) == 0) {
         cell->state = OPEN;
         fieldOpenAdjacentCells(field, currentRow, currentCol);
