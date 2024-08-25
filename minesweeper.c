@@ -225,6 +225,8 @@ int main(int argc, char *argv[]) {
   int optFlag;
   char *rowFlagVal = NULL;
   char *colFlagVal = NULL;
+  int rowsFromFlag = 0;
+  int colsFromFlag = 0;
 
   if (!isatty(STDIN_FILENO)) {
     fprintf(stderr, "Must be run in a terminal");
@@ -254,14 +256,31 @@ int main(int argc, char *argv[]) {
   printf("\033[?25l"); // Hide cursor
   atexit(resetTermState);
 
-  if (!colFlagVal && !rowFlagVal)
-    fieldInit(&field, DEFAULT_ROWS, DEFAULT_COLS);
-  else if (colFlagVal && !rowFlagVal)
-    fieldInit(&field, DEFAULT_ROWS, atoi(colFlagVal));
-  else if (!colFlagVal && rowFlagVal)
-    fieldInit(&field, atoi(rowFlagVal), DEFAULT_COLS);
-  else if (colFlagVal && rowFlagVal)
-    fieldInit(&field, atoi(rowFlagVal), atoi(colFlagVal));
+  if (colFlagVal != NULL)
+    colsFromFlag = atoi(colFlagVal);
+  if (rowFlagVal != NULL)
+    rowsFromFlag = atoi(rowFlagVal);
+
+  bool invalidArgs = false;
+  if (colsFromFlag <= 0) {
+    fprintf(stderr, "'%s' is an invalid value for -c\n", colFlagVal);
+    invalidArgs = true;
+  }
+  if (rowsFromFlag <= 0) {
+    fprintf(stderr, "'%s' is an invalid value for -r\n", rowFlagVal);
+    invalidArgs = true;
+  }
+  if (invalidArgs)
+    exit(1);
+
+  if (colsFromFlag > 0 && rowsFromFlag > 0)
+    fieldInit(&field, rowsFromFlag, colsFromFlag); // Both
+  else if (colsFromFlag > 0 && rowsFromFlag == 0)
+    fieldInit(&field, DEFAULT_ROWS, colsFromFlag); // Cols only
+  else if (colsFromFlag == 0 && rowFlagVal > 0)
+    fieldInit(&field, rowsFromFlag, DEFAULT_COLS); // Rows only
+  else
+    fieldInit(&field, DEFAULT_ROWS, DEFAULT_COLS); // Neither
 
   fieldPrint(&field);
 
