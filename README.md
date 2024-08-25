@@ -8,6 +8,10 @@
 $ gcc ./minesweeper.c -o minesweeper
 $ ./minesweeper
 ```
+3. Add it to your path if you want... maybe at `~/.local/bin` or something
+```console
+$ cp minesweeper ~/.local/bin
+```
 
 ### Controls
 | Key              | Action        |
@@ -21,4 +25,4 @@ $ ./minesweeper
 
 ## TODO
 - [ ] Board size as CLI arg
-- [ ] Fair start (only randomize after first reveal)
+- [x] Fair start (only randomize after first reveal)
