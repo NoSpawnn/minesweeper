@@ -125,8 +125,8 @@ void fieldPrint(Field *field) {
 }
 
 void fieldRePrint(Field *field) {
-  printf("\e[%dA", field->rows + 1);
-  printf("\e[%dD", field->cols);
+  printf("\033[%dA", field->rows + 1);
+  printf("\033[%dD", field->cols);
   fieldPrint(field);
 }
 
@@ -216,7 +216,7 @@ int main() {
   tAttr.c_cc[VMIN] = 1;
   tAttr.c_cc[VTIME] = 0;
   tcsetattr(STDIN_FILENO, TCSANOW, &tAttr);
-  printf("\e[?25l"); // Hide cursor
+  printf("\033[?25l"); // Hide cursor
   atexit(resetTermState);
 
   fieldInit(&field, ROWS, COLS);
