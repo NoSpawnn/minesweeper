@@ -73,11 +73,11 @@ int fieldCellGetNborBombsCount(Field *field, int row, int col) {
   for (int rowDelta = -1; rowDelta <= 1; rowDelta++) {
     for (int colDelta = -1; colDelta <= 1; colDelta++) {
       // TODO: this could probably be a function
-      if (row == 0 && rowDelta == -1 ||
-          row == field->rows - 1 && rowDelta == 1 ||
-          col == 0 && colDelta == -1 ||
-          col == field->cols - 1 && colDelta == 1 ||
-          rowDelta == 0 && colDelta == 0)
+      if ((row == 0 && rowDelta == -1) ||
+          (row == field->rows - 1 && rowDelta == 1) ||
+          (col == 0 && colDelta == -1) ||
+          (col == field->cols - 1 && colDelta == 1) ||
+          (rowDelta == 0 && colDelta == 0))
         continue;
 
       if (field->cells[row + rowDelta][col + colDelta].type == BOMB)
