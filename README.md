@@ -25,5 +25,5 @@ $ cp minesweeper ~/.local/bin
 | <kbd>space</kbd> | Reveal a cell |
 
 ## TODO
-- [ ] Board size as CLI arg
+- [x] Board size as CLI arg
 - [x] Fair start (only randomize after first reveal)

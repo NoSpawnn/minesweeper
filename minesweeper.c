@@ -5,8 +5,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#define ROWS 10
-#define COLS 10
+#define DEFAULT_ROWS 10
+#define DEFAULT_COLS 10
 #define BOMB_PERCENTAGE 25
 #define ANSI_RED "\x1b[31m"
 #define ANSI_RESET "\x1b[0m"
@@ -25,7 +25,7 @@ typedef struct {
   int cols;
   int cursorRow;
   int cursorCol;
-  Cell cells[ROWS][COLS];
+  Cell **cells;
 } Field;
 
 struct termios savedAttrs;
@@ -43,12 +43,22 @@ void fieldInit(Field *field, int rows, int cols) {
   field->cursorRow = 0;
   field->cursorCol = 0;
 
+  field->cells = (Cell **)malloc(rows * sizeof(Cell *));
+
   for (int row = 0; row < field->rows; row++) {
+    field->cells[row] = (Cell *)malloc(cols * sizeof(Cell *));
     for (int col = 0; col < field->cols; col++) {
       field->cells[row][col].state = CLOSED;
       field->cells[row][col].type = EMPTY;
     }
   }
+}
+
+void fieldFree(Field *field) {
+  for (int i = 0; i < field->rows; i++)
+    free(field->cells[i]);
+
+  free(field->cells);
 }
 
 void fieldRandomizeBombs(Field *field, int bombPercentage) {
@@ -116,7 +126,7 @@ void fieldPrint(Field *field) {
         printf(".");
         break;
       case FLAGGED:
-        printf(ANSI_RED"!"ANSI_RESET);
+        printf(ANSI_RED "!" ANSI_RESET);
         break;
       }
 
@@ -206,16 +216,30 @@ void fieldMoveCursor(Field *field, Direction direction) {
   }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
   srand(time(NULL));
   char cmd;
   Field field;
   struct termios tAttr;
   bool first = true;
+  int optFlag;
+  char *rowFlagVal = NULL;
+  char *colFlagVal = NULL;
 
   if (!isatty(STDIN_FILENO)) {
     fprintf(stderr, "Must be run in a terminal");
     exit(1);
+  }
+
+  while ((optFlag = getopt(argc, argv, "r:c:")) != -1) {
+    switch (optFlag) {
+    case 'r':
+      rowFlagVal = optarg;
+      break;
+    case 'c':
+      colFlagVal = optarg;
+      break;
+    }
   }
 
   tcgetattr(STDIN_FILENO, &savedAttrs);
@@ -230,7 +254,15 @@ int main() {
   printf("\033[?25l"); // Hide cursor
   atexit(resetTermState);
 
-  fieldInit(&field, ROWS, COLS);
+  if (!colFlagVal && !rowFlagVal)
+    fieldInit(&field, DEFAULT_ROWS, DEFAULT_COLS);
+  else if (colFlagVal && !rowFlagVal)
+    fieldInit(&field, DEFAULT_ROWS, atoi(colFlagVal));
+  else if (!colFlagVal && rowFlagVal)
+    fieldInit(&field, atoi(rowFlagVal), atoi(colFlagVal));
+  else if (colFlagVal && rowFlagVal)
+    fieldInit(&field, atoi(rowFlagVal), atoi(colFlagVal));
+
   fieldPrint(&field);
 
   while (1) {
@@ -259,9 +291,10 @@ int main() {
       }
       fieldOpenCellAtCursor(&field);
       break;
-    case 'q':
     // TODO: Catch ctrl+c
+    case 'q':
     case '\x003':
+      fieldFree(&field);
       exit(0);
     }
 
