@@ -9,6 +9,9 @@
 ```console
 $ gcc ./minesweeper.c -o minesweeper
 $ ./minesweeper
+
+# You can pass the number of rows and/or columns
+$ ./minesweeper -r <rows> -c <cols>
 ```
 3. Add it to your path if you want... maybe at `~/.local/bin` or something
 ```console
