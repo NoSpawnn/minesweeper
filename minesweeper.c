@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>
@@ -57,7 +58,8 @@ void fieldRandomizeBombs(Field *field, int bombPercentage) {
     int randRow = rand() % (field->rows);
     int randCol = rand() % (field->cols);
 
-    if (field->cells[randRow][randCol].type != BOMB) {
+    if (field->cells[randRow][randCol].type != BOMB &&
+        randRow != field->cursorRow && randCol != field->cursorCol) {
       field->cells[randRow][randCol].type = BOMB;
       setBombs++;
     }
@@ -70,6 +72,7 @@ int fieldCellGetNborBombsCount(Field *field, int row, int col) {
 
   for (int rowDelta = -1; rowDelta <= 1; rowDelta++) {
     for (int colDelta = -1; colDelta <= 1; colDelta++) {
+      // TODO: this could probably be a function
       if (row == 0 && rowDelta == -1 ||
           row == field->rows - 1 && rowDelta == 1 ||
           col == 0 && colDelta == -1 ||
@@ -206,6 +209,7 @@ int main() {
   char cmd;
   Field field;
   struct termios tAttr;
+  bool first = true;
 
   if (!isatty(STDIN_FILENO)) {
     fprintf(stderr, "Must be run in a terminal");
@@ -225,7 +229,6 @@ int main() {
   atexit(resetTermState);
 
   fieldInit(&field, ROWS, COLS);
-  fieldRandomizeBombs(&field, BOMB_PERCENTAGE);
   fieldPrint(&field);
 
   while (1) {
@@ -248,6 +251,10 @@ int main() {
       fieldFlagCellAtCursor(&field);
       break;
     case ' ':
+      if (first) {
+        fieldRandomizeBombs(&field, BOMB_PERCENTAGE);
+        first = false;
+      }
       fieldOpenCellAtCursor(&field);
       break;
     case 'q':
@@ -256,7 +263,7 @@ int main() {
       exit(0);
     }
 
-    if (correctlyFlagged == totalBombs) {
+    if (!first && correctlyFlagged == totalBombs) {
       printf("You won!\n");
       exit(0);
     }
