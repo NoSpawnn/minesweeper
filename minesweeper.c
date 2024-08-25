@@ -28,6 +28,8 @@ typedef struct {
   Cell **cells;
 } Field;
 
+void fieldOpenAdjacentCells(Field *field, int row, int col);
+
 struct termios savedAttrs;
 int totalFlagged = 0, correctlyFlagged = 0;
 int totalBombs;
@@ -157,17 +159,42 @@ void fieldShowAllBombs(Field *field) {
   fieldRePrint(field);
 }
 
-void fieldOpenCellAtCursor(Field *field) {
-  int row = field->cursorRow;
-  int col = field->cursorCol;
-  Cell cell = field->cells[row][col];
+void fieldOpenCell(Field *field, int row, int col) {
+  Cell *cell = &field->cells[row][col];
 
-  if (cell.type == BOMB) {
+  if (cell->type == BOMB) {
     fieldShowAllBombs(field);
     printf("\nThat was a bomb! Game over.\n");
     exit(0);
-  } else if (cell.state != OPEN) {
-    field->cells[row][col].state = OPEN;
+  } else if (cell->state != OPEN) {
+    cell->state = OPEN;
+    if (fieldCellGetNborBombsCount(field, row, col) == 0)
+      fieldOpenAdjacentCells(field, row, col);
+  }
+}
+
+void fieldOpenCellAtCursor(Field *field) {
+  fieldOpenCell(field, field->cursorRow, field->cursorCol);
+}
+
+void fieldOpenAdjacentCells(Field *field, int row, int col) {
+  for (int rowDelta = -1; rowDelta <= 1; rowDelta++) {
+    for (int colDelta = -1; colDelta <= 1; colDelta++) {
+      int currentCol = col + colDelta;
+      int currentRow = row + rowDelta;
+
+      if (!isInField(field, currentRow, currentCol))
+        continue;
+
+      Cell *cell = &field->cells[currentRow][currentCol];
+      if (cell->type == EMPTY && cell->state == CLOSED &&
+          fieldCellGetNborBombsCount(field, currentRow, currentCol) == 0) {
+        cell->state = OPEN;
+        fieldOpenAdjacentCells(field, currentRow, currentCol);
+      } else if (cell->type != BOMB &&
+                 fieldCellGetNborBombsCount(field, currentRow, currentCol) != 0)
+        fieldOpenCell(field, currentRow, currentCol);
+    }
   }
 }
 
