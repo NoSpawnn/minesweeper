@@ -32,3 +32,4 @@ $ cp minesweeper ~/.local/bin
 - [x] Board size as CLI arg
 - [x] Fair start (only randomize after first reveal)
 - [x] Open all adjacent empty cells when appropriate
+- [ ] Fix custom board sizes and bomb counts
