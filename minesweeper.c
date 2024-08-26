@@ -52,7 +52,6 @@ void fieldRandomizeBombs(Field *field, int bombPercentage) {
       field->cells[randRow][randCol].type = BOMB;
       setBombs++;
     }
-
   } while (setBombs != totalBombs);
 }
 
@@ -302,6 +301,7 @@ int main(int argc, char *argv[]) {
       fieldOpenCellAtCursor(&field);
       break;
     case 'q':
+      fieldShowAllBombs(&field);
       fieldFree(&field);
       exit(0);
     }
