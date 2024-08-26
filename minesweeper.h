@@ -24,12 +24,15 @@ typedef struct {
   Cell **cells;
 } Field;
 
+// `SIGINT` handler
+void handleQuit();
 void resetTermState();
 void fieldInit(Field *field, int rows, int cols);
 void fieldFree(Field *field);
 // Check if the given position is within the bounds of the field
 bool isInField(Field *field, int row, int col);
-// Place n random bombs on the field when `n = totalCells * bombPercentage / 100`
+// Place n random bombs on the field when `n = totalCells * bombPercentage /
+// 100`
 void fieldRandomizeBombs(Field *field, int bombPercentage);
 // Get the number of bombs neighbouring a given cell on the field
 int fieldCellGetNborBombsCount(Field *field, int row, int col);

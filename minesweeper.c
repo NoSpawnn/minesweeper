@@ -1,4 +1,5 @@
 #include "minesweeper.h"
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>
@@ -8,6 +9,7 @@
 struct termios savedAttrs;
 int totalFlagged = 0, correctlyFlagged = 0;
 int totalBombs;
+Field field;
 
 void resetTermState() {
   tcsetattr(STDIN_FILENO, TCSANOW, &savedAttrs);
@@ -217,15 +219,20 @@ void fieldMoveCursor(Field *field, Direction direction) {
   }
 }
 
+void handleQuit() {
+  fieldFree(&field);
+  exit(0);
+}
+
 int main(int argc, char *argv[]) {
   srand(time(NULL));
   char cmd;
-  Field field;
   struct termios tAttr;
   bool first = true;
   int optFlag;
   int rowsFromFlag = 0;
   int colsFromFlag = 0;
+  signal(SIGINT, handleQuit);
 
   if (!isatty(STDIN_FILENO)) {
     fprintf(stderr, "Must be run in a terminal");
