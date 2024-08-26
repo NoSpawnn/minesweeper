@@ -1,5 +1,8 @@
 #include <stdbool.h>
 
+#ifndef MINESWEEPER_H_
+#define MINESWEEPER_H_
+
 #define DEFAULT_ROWS 10
 #define DEFAULT_COLS 10
 #define BOMB_PERCENTAGE 18
@@ -45,3 +48,5 @@ void fieldOpenCellAtCursor(Field *field);
 void fieldOpenAdjacentCells(Field *field, int row, int col);
 void fieldFlagCellAtCursor(Field *field);
 void fieldMoveCursor(Field *field, Direction direction);
+
+#endif // MINESWEEPER_H_
