@@ -5,7 +5,7 @@
 ## Usage
 1. Clone the repo
 2. Build and run
-```console
+```sh
 $ gcc ./minesweeper.c -o minesweeper
 $ ./minesweeper
 
@@ -13,7 +13,7 @@ $ ./minesweeper
 $ ./minesweeper -r <rows> -c <cols>
 ```
 3. Add it to your path if you want... maybe at `~/.local/bin` or something
-```console
+```sh
 $ cp minesweeper ~/.local/bin
 ```
 
